@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var noteTextarea = document.getElementById('note');
     var saveButton = document.getElementById('save');
-    var loadButton = document.getElementById('load');
+    var loadButton = document.getElementById('clear');
   
     // 保存笔记
     saveButton.addEventListener('click', function () {
@@ -29,9 +28,22 @@ document.addEventListener('DOMContentLoaded', function () {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
         });
+
+        chrome.storage.local.get(['pages'], (result) => {
+          const pages = result.pages || [];
+          pages.forEach((page, index) => {
+            const blob = new Blob([page.source], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${url}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+        });
     });
   
-    // 加载笔记
+    // 清理笔记
     loadButton.addEventListener('click', function () {
         chrome.storage.local.set({ logs: [] }, () => {
             console.log('Clear Log!');
